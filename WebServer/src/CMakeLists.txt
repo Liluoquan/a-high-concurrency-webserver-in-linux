@@ -1,7 +1,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/src/base)
 include_directories(${PROJECT_SOURCE_DIR}/src/server)
 
-add_executable(WebServer Main.cpp)
+add_executable(WebServer Main.cc)
 
 target_link_libraries(WebServer
     server

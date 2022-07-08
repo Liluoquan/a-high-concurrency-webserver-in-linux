@@ -8,8 +8,8 @@
 #include "MutexLock.h"
 #include "noncopyable.h"
 
-// TODO 提供自动归档功能
-// TODO 增加日志滚动功能：
+// TODO: 提供自动归档功能
+// TODO: 增加日志滚动功能：
 //      1、每写满1G换下个文件
 //      2、每天零点新建一个日志文件，不论前一个文件是否写满
 class LogFile : noncopyable {

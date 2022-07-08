@@ -16,7 +16,7 @@ class FixedBuffer : noncopyable {
 public:
     FixedBuffer() 
         : cur_(data_) {
-        //TODO 加入setcookie的功能
+        //TODO: 加入setcookie的功能
     }
 
     ~FixedBuffer() {}

@@ -4,8 +4,11 @@
 set -x
 
 SOURCE_DIR=`pwd`
-BUILD_DIR=${BUILD_DIR:-../build}
+BUILD_DIR=${BUILD_DIR:-./build}
 BUILD_TYPE=${BUILD_TYPE:-Debug}
+
+mkdir ./lib
+mkdir ./bin
 
 mkdir -p $BUILD_DIR/$BUILD_TYPE \
     && cd $BUILD_DIR/$BUILD_TYPE \
@@ -13,4 +16,6 @@ mkdir -p $BUILD_DIR/$BUILD_TYPE \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
             $SOURCE_DIR \
     && make $* \
-    && cp -r $SOURCE_DIR/src/page $SOURCE_DIR/../build/Debug/src/page
+    && cp -r $SOURCE_DIR/src/page $SOURCE_DIR/bin/page
+
+cd $SOURCE_DIR/bin

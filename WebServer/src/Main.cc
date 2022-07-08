@@ -9,7 +9,7 @@
 #include "server/HTTPServer.h"
 #include "server/FTPServer.h"
 
-#define FTPSERVER_DEBUG
+// #define FTPSERVER_DEBUG
 
 
 
@@ -25,11 +25,11 @@ int main(int argc, char* argv[]) {
     const char* str = "t:l:p:o:r:";
     while((opt = getopt(argc, argv, str)) != -1) {
         switch(opt) {
-            case 't' : {  //threadNum
+            case 't' : {  // threadNum
                 threadNum = atoi(optarg);
                 break;
             }
-            case 'l' : {  //logPath
+            case 'l' : {  // logPath
                 logPath = optarg;
                 if(logPath.size() < 2 || optarg[0] != '/') {
                     printf("logPath should start with \"/\"\n");
@@ -37,19 +37,19 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case 'p' : {  //port
+            case 'p' : {  // port
                 port = atoi(optarg);
                 break;
             }
-            case 'v' : {  //version
-                printf("WebServer version 1.0 (base on muduo)\n");
+            case 'v' : {  // version
+                printf("WebServer version 3.0 (base on muduo)\n");
                 break;
             }
-            case 'o' : {  //commandOffset
+            case 'o' : {  // commandOffset
                 commandOffset = atoi(optarg);
                 break;
             }
-            case 'r' : {  //rootDir
+            case 'r' : {  // rootDir
                 rootDir = optarg;
                 if(rootDir.size() < 2 || optarg[0] != '/') {
                     printf("logPath should start with \"/\"\n");
@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            default:  {// 参数不存在
+            default:  {  // 参数不存在
                 printf("Usage: %s [-t threadNum] [-l logFilePath] [-p port] [-v] \n", argv[0]);
                 return 0;
             }

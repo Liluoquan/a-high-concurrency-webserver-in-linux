@@ -37,4 +37,4 @@ namespace CurrentThread {
     inline const char* name() {
         return t_threadName;
     }
-}
+}  // namespace CurrentThread

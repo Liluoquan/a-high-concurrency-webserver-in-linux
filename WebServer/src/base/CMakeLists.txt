@@ -1,12 +1,12 @@
 # 将多个源文件复制给LIB_SRC变量
 set(LIB_SRC
-    AsyncLogging.cpp
-    CountDownLatch.cpp
-    FileUtil.cpp
-    LogFile.cpp
-    Logging.cpp
-    LogStream.cpp
-    Thread.cpp
+    AsyncLogging.cc
+    CountDownLatch.cc
+    FileUtil.cc
+    LogFile.cc
+    Logging.cc
+    LogStream.cc
+    Thread.cc
 )
 
 # 将LIB_SRC编译成名为libserver_base的静态库（动态库需要加SHARED关键字）

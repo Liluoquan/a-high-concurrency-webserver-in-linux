@@ -67,14 +67,14 @@ int main(int argc, char* argv[]) {
     cout << "send userInfo now" << std::endl;
 #endif
     sleep(1);
-    size_t n = write(sockfd, msg.c_str(), msg.size());
+    write(sockfd, msg.c_str(), msg.size());
 
 #ifdef DEBUG_FTPCLIENT
     cout << "the msg send to server is: " << msg << std::endl;
     // cout << "the msg.c_str() send to server is: " << msg.c_str() << std::endl;
 #endif
     sleep(1);
-    n = read(sockfd, buff, sizeof(buff));
+    read(sockfd, buff, sizeof(buff));
     msg = buff;
 
 #ifdef DEBUG_FTPCLIENT
