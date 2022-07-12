@@ -202,7 +202,7 @@ int setSocketNonBlocking(int fd) {
     if(flag == -1) return -1;
 
     //将文件设置为非阻塞
-    //nonblock:在读取不到数据或是写入缓冲区已满会马上return，而不会阻塞等待
+    //nonblock: 在读取不到数据或是写入缓冲区已满会马上return，而不会阻塞等待
     flag |= O_NONBLOCK;
     // 设置文件的flags
     if(fcntl(fd, F_SETFL, flag) == -1) return -1;
@@ -210,7 +210,8 @@ int setSocketNonBlocking(int fd) {
 }
 
 
-// 设置TCP连接nodelay
+// 关闭 nagle 算法
+// 提高对于小包的响应速度
 void setSocketNoDelay(int fd) {
     int enable = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (void *)&enable, sizeof(enable));

@@ -21,8 +21,8 @@ std::unordered_map<std::string, std::string> MimeType::mime_;
 // std::unordered_map<int, std::string> MimeType::ErrorMsg_;
 
 const __uint32_t DEFAULT_EVENT = EPOLLIN | EPOLLET /* | EPOLLONESHOT */;
-const int DEFAULT_EXPIRED_TIME = 2000;             //ms
-const int DEFAULT_KEEP_ALIVE_TIME = 1 * 60 * 1000; //ms(1 min)
+const int DEFAULT_EXPIRED_TIME = 2000;             // 短连接的超时时间：2000ms = 2s
+const int DEFAULT_KEEP_ALIVE_TIME = 1 * 60 * 1000; // 长连接的超时时间：60000ms = 60s = 1min
 
 void MimeType::init()
 {
@@ -71,7 +71,7 @@ httpConnection::httpConnection(sp_Channel channel)
     handleParse_[2] = bind(&httpConnection::parseHeader, this);
     handleParse_[3] = bind(&httpConnection::parseSuccess, this);
     channel_->setReadHandler(bind(&httpConnection::handleRead, this));
-    channel_->setEvents(EPOLLIN | EPOLLET);
+    channel_->setEvents(DEFAULT_EVENT);
     LOG << "create a httpConnection";
 }
 
@@ -80,7 +80,7 @@ void httpConnection::reset()
     fileName_.clear();
     //path_.clear();
     nowReadPos_ = 0;
-    // parseState_ = PARSE_REQUSET;
+    parseState_ = ParseState::PARSE_REQUSET;
     headers_.clear();
 }
 
@@ -109,7 +109,7 @@ void httpConnection::handleRead()
         // FIXME:此处包含了读到RST和FIN的情况，暂时按照断开连接处理
         this->reset();
         channel_->setDeleted(true);
-        channel_->getLoop().lock()->addTimer(channel_, 0);
+        channel_->getLoop().lock()->addTimer(channel_, DEFAULT_EXPIRED_TIME);
         return;
     }
 
@@ -264,7 +264,7 @@ void httpConnection::handleSuccess()
         else
         {
             // 短连接的处理
-            channel_->getLoop().lock()->addTimer(channel_, 0);
+            channel_->getLoop().lock()->addTimer(channel_, DEFAULT_EXPIRED_TIME);
         }
         outBuffer_ += "Content-Type: " + fileType_ + "\r\n";
         outBuffer_ += "Content-Length: " + to_string(fileSize_) + "\r\n";
@@ -300,7 +300,7 @@ void httpConnection::handleSuccess()
     this->reset();
 
     // 重新注册读事件
-    channel_->setEvents(EPOLLIN | EPOLLET);
+    channel_->setEvents(DEFAULT_EVENT);
     channel_->getLoop().lock()->updatePoller(channel_);
 
 }
@@ -331,6 +331,6 @@ void httpConnection::handleError(int err_num, string short_msg)
     outBuffer_.clear();
 
     // 重新注册读事件
-    channel_->setEvents(EPOLLIN | EPOLLET);
+    channel_->setEvents(DEFAULT_EVENT);
     channel_->getLoop().lock()->updatePoller(channel_);
 }

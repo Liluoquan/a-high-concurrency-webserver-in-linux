@@ -75,8 +75,8 @@ void HTTPServer::handleNewConn()
         }
 
         // TODO:TCP包的传输问题
-        // setSocketNoDelay(accept_fd);
-        // setSocketNoLinger(accept_fd);
+        setSocketNoDelay(accept_fd);
+        setSocketNoLinger(accept_fd);
 
         sp_Channel connChannel(newElement<Channel>(nextLoop, accept_fd), deleteElement<Channel>);
         std::weak_ptr<Channel> wpChannel = connChannel;

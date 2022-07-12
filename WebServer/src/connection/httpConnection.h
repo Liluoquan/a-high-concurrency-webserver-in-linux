@@ -83,6 +83,10 @@ public:
     httpConnection(sp_Channel channel);
     ~httpConnection() {}
     void reset();
+    void release();
+    int getFd();
+    void resetTimer();
+    void setTimer(std::shared_ptr<timer::Timer> timer);
     // void seperateTimer();
     std::shared_ptr<Channel> getChannel() { return channel_; }
     // EventLoop* getLoop() { return loop_; }

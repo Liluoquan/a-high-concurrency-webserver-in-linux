@@ -15,7 +15,7 @@
 
 int main(int argc, char* argv[]) {
     int threadNum = 2;
-    int port = 4242;
+    int port = 8888;
     unsigned short commandOffset = 3;
     std::string rootDir = "./";
     std::string logPath = "./WebServer.log";
