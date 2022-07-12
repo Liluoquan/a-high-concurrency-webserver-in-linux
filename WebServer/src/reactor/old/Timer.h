@@ -19,8 +19,8 @@ typedef std::shared_ptr<Channel> sp_Channel;
 class TimerNode {
 public:
     TimerNode(sp_Channel channel, int timeout);
-    ~TimerNode();
     // TimerNode(TimerNode& tn);
+    ~TimerNode();
     void update(int timeout);
     bool isValid();
     // void setDeleted() { deleted_ = true; }

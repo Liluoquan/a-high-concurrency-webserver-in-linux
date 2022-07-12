@@ -12,7 +12,8 @@ TimerNode::TimerNode(sp_Channel channel, int timeout)
     : channel_(channel) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    //FIXME:获取当前时间的毫秒？
+    // 以毫秒计算
+    // 到期时间 = 当前时间(秒余到10000以内换算成ms + 微妙换算成ms) + 超时时间(ms)
     expiredTime_ = 
         (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
 }
