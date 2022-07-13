@@ -1,21 +1,27 @@
-#!/bin/sh
+#!/bin/bash
 
-# -x：执行指令后，会先显示该指令及所下的参数
-set -x
+#用makefile还是cmake
+use_make=0
+build_dir=./build
 
-SOURCE_DIR=`pwd`
-BUILD_DIR=${BUILD_DIR:-./build}
-BUILD_TYPE=${BUILD_TYPE:-Debug}
+if [ $use_make -eq 1 ]
+then
+    #Makefile
+    make clean && make -j8 && make install
+else
+    #cmake 判断文件夹是否存在
+    if [ ! -d $build_dir ]
+    then
+        mkdir $build_dir 
+    else
+        rm -r $build_dir
+        mkdir $build_dir 
+    fi
 
-mkdir ./lib
-mkdir ./bin
+    cd $build_dir
+    cmake .. && make -j8 && make install 
+    cd ..
+fi
 
-mkdir -p $BUILD_DIR/$BUILD_TYPE \
-    && cd $BUILD_DIR/$BUILD_TYPE \
-    && cmake \
-            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-            $SOURCE_DIR \
-    && make $* \
-    && cp -r $SOURCE_DIR/src/page $SOURCE_DIR/bin/page
-
-cd $SOURCE_DIR/bin
+flush_core
+rm -f $log_file_name

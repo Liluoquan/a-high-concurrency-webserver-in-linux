@@ -81,32 +81,41 @@ sh ./build.sh
 ### 运行
 
 ```shell
-./WebServer [-t threadNum] [-l logFilePath] [-p port] [-v]
+    # 直接输入参数启动
+    ./web_server [-p port] [-t thread_numbers] [-f log_file_name] [-o open_log] [-s log_to_stderr] [-c color_log_to_stderr] [-l min_log_level]
+    # 使用脚本启动
+    sh ./run_server.sh
 ```
 
-- `threadNum` ：为 `subReactor` 的数目，也就是业务线程池中的线程数（不包括后台的日志线程），默认为2
-- `logFilePath` : 为服务器日志文件的路径，默认为 `WebServer` 所在的目录
-- `port` : 服务器监听的端口号，默认为 4242
-
+- `port`：为服务器监听的端口号，默认为 8888
+- `thread_numbers` ：为 `subReactor` 的数目，也就是业务线程池中的线程数（不包括后台的日志线程），默认为2
+- `log_file_name` : 为服务器日志文件的路径，默认为 `WebServer` 所在的目录，文件不存在的话程序会自动创建
+- `open_log` : 是否启用日志功能，1-启用 0-不启用
+- `log_to_stderr`：日志同时输出到 `stderr`，1-启用 0-不启用
+- `color_log_to_stderr`：输出日志颜色，1-启用 0-不启用
+- `min_log_level`：输出的最小日志等级，0-DEBUG 1-INFO 2-WARNING 3-ERROR 4-FATAL
 
 
 ## 压力测试
 
 压力测试使用开源压测工具 WebBench，开启1000个进程，访问服务器60s，过程是客户端发出请求，然后服务器读取并解析，返回响应报文，客户端读取。
 
-长连接因为不必频繁的创建新套接字去请求，然后发送数据读取数据，关闭套接字等操作，所以比短连接QPS高很多。
+长连接因为不需要频繁的创建新套接字去响应请求，然后发送数据读取数据，关闭套接字等操作，所以比短连接QPS高很多。
 
 ### 参数调节
 
-- 将单个进程可以打开的文件描述符 descriptors 设置成了 100w
-- 设置了能够使用的端口号，从 10000 开始到 65536 都可以使用，也就是5w多个端口
+- 将单个进程可以打开的文件描述符 descriptors 设置成了 10w
 - 程序中关闭了套接字的TCP Nagle算法, 避免响应时间过久，每次数据直接发，而不用等到一定量再一起发。
 
 
 
 ### 压测结果
 
-HTTP长连接 QPS: 26万
+本地测试：
+
+- HTTP短连接(QPS:1.8w)
+![HTTP短连接测试图](./img/短连接测试.jpg)
 
 
-
+- HTTP长连接(QPS:5.2万)
+![HTTP短连接测试图](./img/长连接测试.jpg)
