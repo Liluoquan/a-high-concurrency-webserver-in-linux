@@ -12,8 +12,6 @@ log_to_stderr=1
 color_log_to_stderr=1
 #打印的最小日志等级
 min_log_level=0
-#数据库连接池
-connection_num=6
 #线程池
 thread_num=6
 

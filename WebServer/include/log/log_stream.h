@@ -35,12 +35,12 @@
 #define CLRLINE              "\r\e[K"
 
 namespace log {
-//类的前置声明
+// 类的前置声明
 class AsyncLogging;
 constexpr int kSmallBufferSize = 4000;
 constexpr int kLargeBufferSize = 4000 * 1000;
 
-//固定的缓冲区
+// 固定的缓冲区
 template <int buffer_size>
 class FixedBuffer : utility::NonCopyAble {
  public:

@@ -11,7 +11,7 @@
 #include "thread/thread.h"
 
 namespace log {
-//操作文件的工具类
+// 操作文件的工具类
 class FileUtils {
  public:
     explicit FileUtils(std::string file_name)
@@ -23,10 +23,10 @@ class FileUtils {
         fclose(fp_);
     }
 
-    //写日志到文件
+    // 写日志到文件
     void Write(const char* single_log, const size_t size) {
         size_t write_size = fwrite_unlocked(single_log, 1, size, fp_);
-        //剩余size
+        // 剩余size
         size_t remain_size = size - write_size;
         //如果一次没写完 就继续写
         while (remain_size > 0) {
@@ -66,7 +66,7 @@ class LogFile : utility::NonCopyAble {
     ~LogFile() {
     }
 
-    //写日志到文件
+    // 写日志到文件
     void Write(const char* single_log, int size) {
         locker::LockGuard lock(mutex_);
         {
@@ -96,6 +96,7 @@ class LogFile : utility::NonCopyAble {
 };
 
 class AsyncLogging : utility::NonCopyAble {
+    using Buffer = FixedBuffer<kLargeBufferSize>;
  public:
     AsyncLogging(const std::string file_name, int flush_interval = 2);
     ~AsyncLogging();
@@ -108,8 +109,6 @@ class AsyncLogging : utility::NonCopyAble {
     void Worker();  //线程函数 将buffer的数据写入日志文件
 
  private:
-    using Buffer = FixedBuffer<kLargeBufferSize>;
-    
     std::string file_name_;
     const int timeout_;
     bool is_running_;

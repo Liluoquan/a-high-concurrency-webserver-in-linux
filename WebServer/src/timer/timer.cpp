@@ -20,14 +20,14 @@ Timer::Timer(std::shared_ptr<http::HttpConnection> http_connection, int timeout)
     expire_time_ = (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
 }
 
-//拷贝构造函数
+// 拷贝构造函数
 Timer::Timer(Timer& timer)
     : http_connection_(timer.http_connection_), 
       expire_time_(0) {
 }
 
-//定时器析构时 (如果是因重新绑定新定时器而将此旧定时器删除的情况，http对象reset,所以不会调用Delete)
-//如果是因为超时而将此定时器删除的情况 就会调用http的Delete(EpollDel, close(fd))
+// 定时器析构时 (如果是因重新绑定新定时器而将此旧定时器删除的情况，http对象reset,所以不会调用Delete)
+// 如果是因为超时而将此定时器删除的情况 就会调用http的Delete(EpollDel, close(fd))
 Timer::~Timer() {
     if (http_connection_) {
         LOG(INFO) << "Timeout, close sockfd: " << http_connection_->connect_fd();
@@ -35,14 +35,14 @@ Timer::~Timer() {
     }
 }
 
-//更新到期时间 = 当前时间 + 超时时间
+// 更新到期时间 = 当前时间 + 超时时间
 void Timer::Update(int timeout) {
     struct timeval now;
     gettimeofday(&now, NULL);
     expire_time_ = (((now.tv_sec % 10000) * 1000) + (now.tv_usec / 1000)) + timeout;
 }
 
-//是否到期
+// 是否到期
 bool Timer::is_expired() {
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -55,7 +55,7 @@ bool Timer::is_expired() {
     return false;
 }
 
-//释放http
+// 释放http
 void Timer::Release() {
     http_connection_.reset();
     is_deleted_ = true;

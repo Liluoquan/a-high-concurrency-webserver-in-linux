@@ -1,4 +1,4 @@
-#include "http/http_connection.h"
+#include "connection/http_connection.h"
 
 #include <string.h>
 #include <fcntl.h>
@@ -14,7 +14,8 @@
 #include "log/logging.h"
 
 namespace http {
-//http类 给连接套接字绑定事件处理回调
+
+// HttpConnection类 给连接套接字绑定事件处理回调
 HttpConnection::HttpConnection(event::EventLoop* event_loop, int connect_fd)
     : event_loop_(event_loop),
       connect_fd_(connect_fd),
@@ -26,50 +27,53 @@ HttpConnection::HttpConnection(event::EventLoop* event_loop, int connect_fd)
       version_(HTTP_1_1),
       is_error_(false),
       is_keep_alive_(false) {
-    //给连接套接字绑定读、写、连接的回调函数
+    // 给连接套接字绑定读、写、连接的回调函数
     connect_channel_->set_read_handler(std::bind(&HttpConnection::HandleRead, this));
     connect_channel_->set_write_handler(std::bind(&HttpConnection::HandleWrite, this));
     connect_channel_->set_update_handler(std::bind(&HttpConnection::HandleUpdate, this));
-    //得到服务器资源目录
+    
+    // 得到服务器资源目录
     char cwd[100];
     char* cur_dir = getcwd(cwd, 100);
     resource_dir_ = std::string(cur_dir) + "/resource/";
 }
 
-//一个http连接析构后 关闭连接套接字
+// http连接析构时 关闭连接套接字
 HttpConnection::~HttpConnection() {
     close(connect_fd_);
 }
 
-//给fd注册默认事件, 这里给了超时时间，所以会绑定定时器和http对象
+// 给fd注册默认事件, 这里给了超时时间，所以会绑定定时器和http对象
 void HttpConnection::Register() {
     connect_channel_->set_events(kDefaultEvent);
     event_loop_->PollerAdd(connect_channel_, kDefaultTimeOut);
 }
 
-//从epoll事件表中删除fd(绑定的定时器被删除时 会调用此函数),然后http连接释放，会close掉fd
+// 从epoll事件表中删除fd(绑定的定时器被删除时 会调用此函数),然后http连接释放，会close掉fd
+// 注意此时需要延长 HttpConnection 的寿命，避免 HttpConnection 在函数执行过程中主动关闭
+// 导致 coredump
 void HttpConnection::Delete() {
-    //连接状态变为已关闭
-    connection_state_ = DISCONNECTED;
+    // 连接状态变为已关闭
     std::shared_ptr<HttpConnection> guard(shared_from_this());
+    connection_state_ = DISCONNECTED;
     event_loop_->PollerDel(connect_channel_);
 }
 
-//处理读   读请求报文数据到read_buffer 解析请求报文 构建响应报文并写入write_buffer
+// 处理读   读请求报文数据到 read_buffer 解析请求报文 构建响应报文并写入write_buffer
 void HttpConnection::HandleRead() {
     int& events = connect_channel_->events();
     do {
         bool is_read_zero_bytes = false;
-        //读客户端发来的请求数据 存入read_buffer
+        // 读客户端发来的请求数据 存入read_buffer
         int read_bytes = utility::Read(connect_fd_, read_buffer_, is_read_zero_bytes);
-        //LOG(DEBUG) << "Request " << read_buffer_;
+        // LOG(DEBUG) << "Request " << read_buffer_;
         if (connection_state_ == DISCONNECTING) {
             read_buffer_.clear();
             break;
         }
         if (read_bytes < 0) {
             LOG(WARNING) << "Read bytes < 0, " << strerror(errno);
-            //标记为error的都是直接返回错误页面
+            // 标记为error的都是直接返回错误页面
             is_error_ = true;
             ReturnErrorMessage(connect_fd_, 400, "Bad Request");
             break;
@@ -82,7 +86,7 @@ void HttpConnection::HandleRead() {
             }
         }
 
-        //解析请求行
+        // 解析请求行
         if (process_state_ == STATE_PARSE_LINE) {
             LineState line_state = ParseRequestLine();
             if (line_state == PARSE_LINE_AGAIN) {
@@ -91,7 +95,7 @@ void HttpConnection::HandleRead() {
                 LOG(WARNING) << "Parse request line error, sockfd: " 
                              << connect_fd_ << ", " << read_buffer_ << "******";
                 read_buffer_.clear();
-                //标记为error的都是直接返回错误页面
+                // 标记为error的都是直接返回错误页面
                 is_error_ = true;
                 ReturnErrorMessage(connect_fd_, 400, "Bad Request");
                 break;
@@ -113,7 +117,7 @@ void HttpConnection::HandleRead() {
                 ReturnErrorMessage(connect_fd_, 400, "Bad Request");
                 break;
             }
-            //如果是GET方法此时已解析完成 如果是POST方法 继续解析请求体
+            // 如果是GET方法此时已解析完成 如果是POST方法 继续解析请求体
             if (method_ == METHOD_POST) {
                 // POST方法
                 process_state_ = STATE_RECV_BODY;
@@ -129,7 +133,7 @@ void HttpConnection::HandleRead() {
             if (request_headers_.find("Content-length") != request_headers_.end()) {
                 content_length = stoi(request_headers_["Content-length"]);
             } else {
-                //标记为error的都是直接返回错误页面
+                // 标记为error的都是直接返回错误页面
                 is_error_ = true;
                 ReturnErrorMessage(connect_fd_, 400, "Bad Request: Lack of argument (Content-length)");
                 break;
@@ -179,7 +183,7 @@ void HttpConnection::HandleWrite() {
     //如果没有发生错误 并且连接没断开 就把写缓冲区的数据 发送给客户端
     if (!is_error_ && connection_state_ != DISCONNECTED) {
         int& events = connect_channel_->events();
-        //LOG(DEBUG) << "Response " << write_buffer_;
+        // LOG(DEBUG) << "Response " << write_buffer_;
         if (utility::Write(connect_fd_, write_buffer_) < 0) {
             LOG(WARNING) << "Send response to client error, " << strerror(errno);
             events = 0;
@@ -199,23 +203,23 @@ void HttpConnection::HandleUpdate() {
     int& events = connect_channel_->events();
 
     if (!is_error_ && connection_state_ == CONNECTED) {
-        //还处在建立连接状态 如果事件不为0，说明在处理时添加了(EPOLLIN或者EPOLLOUT)
+        // 还处在建立连接状态 如果事件不为0，说明在处理时添加了(EPOLLIN或者EPOLLOUT)
         if (events != 0) {
-            //如果keep-alive 则超时时间就设为5分钟，否则就是5秒
+            // 如果keep-alive 则超时时间就设为5分钟，否则就是5秒
             int timeout = kDefaultTimeOut;
             if (is_keep_alive_) {
                 timeout = kDefaultKeepAliveTime;
             }
-            //如果监听事件是读加写，就变为写, 最后用ET边缘触发模式
+            // 如果监听事件是读加写，就变为写, 最后用ET边缘触发模式
             if ((events & EPOLLIN) && (events & EPOLLOUT)) {
                 events = 0;
                 events |= EPOLLOUT;
             }
             events |= EPOLLET;
-            //更新监听事件， 以及重新绑定新定时器, Loop最后调HandleExpire会删掉旧的定时器
+            // 更新监听事件， 以及重新绑定新定时器, Loop最后调HandleExpire会删掉旧的定时器
             event_loop_->PollerMod(connect_channel_, timeout);
         } else if (is_keep_alive_) {
-            //当前没有事件 并且keep-alive 监听可读事件
+            // 当前没有事件 并且keep-alive 监听可读事件
             events |= (EPOLLIN | EPOLLET);
             int timeout = kDefaultKeepAliveTime;
             event_loop_->PollerMod(connect_channel_, timeout);
@@ -263,7 +267,7 @@ void HttpConnection::ReturnErrorMessage(int fd, int error_code, std::string erro
     write_buffer_.clear();
 }
 
-//解析请求行
+// 解析请求行
 LineState HttpConnection::ParseRequestLine() {
     std::string& request_data = read_buffer_;
     // 读到完整的请求行再开始解析请求
@@ -278,7 +282,7 @@ LineState HttpConnection::ParseRequestLine() {
     } else {
         request_data.clear();
     }
-    //GET /filename HTTP1.1 请求方法
+    // GET /filename HTTP1.1 请求方法
     int get_pos = request_line.find("GET");
     int post_pos = request_line.find("POST");
     int head_pos = request_line.find("HEAD");
@@ -522,7 +526,7 @@ ResponseState HttpConnection::BuildResponse() {
         response_header += "\r\n";
         write_buffer_ += response_header;
 
-        //请求HEAD方法 不必返回响应体数据 此时就已经完成 
+        // 请求HEAD方法 不必返回响应体数据 此时就已经完成 
         if (method_ == METHOD_HEAD) {
             return RESPONSE_SUCCESS;
         }

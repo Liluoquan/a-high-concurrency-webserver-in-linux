@@ -2,7 +2,7 @@
 #define UTILITY_NONCOPYABLE_H_
 
 namespace utility {
-//删除拷贝构造和拷贝赋值 子类继承此父类时 子类如果没有自己定义就会默认调用父类的
+// 删除拷贝构造和拷贝赋值 子类继承此父类时 子类如果没有自己定义就会默认调用父类的
 class NonCopyAble {
  public:
     NonCopyAble(const NonCopyAble&) = delete;

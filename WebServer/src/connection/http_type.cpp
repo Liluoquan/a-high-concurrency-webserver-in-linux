@@ -1,4 +1,4 @@
-#include "http/http_type.h"
+#include "connection/http_type.h"
 
 #include <string>
 

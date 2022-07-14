@@ -45,7 +45,7 @@ file(GLOB THREAD_SRC_FILE   ${SRC_DIR}/thread/*.cpp)
 file(GLOB TIMER_SRC_FILE    ${SRC_DIR}/timer/*.cpp)
 file(GLOB LOG_SRC_FILE      ${SRC_DIR}/log/*.cpp)
 file(GLOB EVENT_SRC_FILE    ${SRC_DIR}/event/*.cpp)
-file(GLOB HTTP_SRC_FILE     ${SRC_DIR}/http/*.cpp)
+file(GLOB HTTP_SRC_FILE     ${SRC_DIR}/connection/*.cpp)
 file(GLOB SERVER_SRC_FILE   ${SRC_DIR}/server/*.cpp)
 set(MAIN_SRC_FILE           ${ROOT_DIR}/main.cpp)
 

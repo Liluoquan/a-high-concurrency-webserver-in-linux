@@ -24,12 +24,12 @@ WebServer::WebServer(event::EventLoop* event_loop, int thread_num, int port)
                                                                           event_loop_, thread_num));
     accept_channel_ = std::make_shared<event::Channel>();
 
-    //绑定服务器ip和端口 监听端口
+    // 绑定服务器ip和端口 监听端口
     listen_fd_ = utility::SocketListen(port_); 
     accept_channel_->set_fd(listen_fd_);
     utility::HandlePipeSignal();
 
-    //设置NIO非阻塞套接字
+    // 设置NIO非阻塞套接字
     if (utility::SetSocketNonBlocking(listen_fd_) < 0) {
         perror("set socket non block failed");
         abort();
