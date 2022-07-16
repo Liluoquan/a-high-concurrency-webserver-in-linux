@@ -1,6 +1,9 @@
 #include "memory/memory_pool.h"
 #include <assert.h>
 
+namespace memoryPool
+{
+    
 // template <typename T, size_t BlockSize>
 MemoryPool::MemoryPool() {}
 
@@ -45,7 +48,7 @@ Slot* MemoryPool::allocateBlock() {
     // 注意：多个线程（eventLoop共用一个MemoryPool）
     Slot* useSlot;
     {
-        MutexLockGuard lock(mutex_other_);
+        locker::LockGuard lock(mutex_other_);
         // newBlock接到Block链表的头部
         reinterpret_cast<Slot *>(newBlock)->next = currentBolck_;
         currentBolck_ = reinterpret_cast<Slot *>(newBlock);
@@ -68,7 +71,7 @@ Slot* MemoryPool::nofree_solve() {
         return allocateBlock();
     Slot* useSlot;
     {
-        MutexLockGuard lock(mutex_other_);
+        locker::LockGuard lock(mutex_other_);
         useSlot = currentSlot_;
         currentSlot_ += (slotSize_ >> 3);
     }
@@ -80,7 +83,7 @@ Slot* MemoryPool::nofree_solve() {
 Slot* MemoryPool::allocate() {
     if(freeSlot_) {
         {
-            MutexLockGuard lock(mutex_freeSlot_);
+            locker::LockGuard lock(mutex_freeSlot_);
             if(freeSlot_) {
                 Slot* result = freeSlot_;
                 freeSlot_ = freeSlot_->next;
@@ -96,7 +99,7 @@ Slot* MemoryPool::allocate() {
 inline void MemoryPool::deAllocate(Slot* p) {
     if(p) {
         // 将slot加入释放队列
-        MutexLockGuard lock(mutex_freeSlot_);
+        locker::LockGuard lock(mutex_freeSlot_);
         p->next = freeSlot_;
         freeSlot_ = p;
     }
@@ -134,3 +137,7 @@ void free_Memory(size_t size, void* p) {
     }
     get_MemoryPool(((size + 7) >> 3) - 1).deAllocate(reinterpret_cast<Slot *>(p));
 }
+
+} // namespace memoryPool
+
+

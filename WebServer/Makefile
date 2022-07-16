@@ -56,19 +56,19 @@ $(STATIC_LIB): $(OBJS)
 	ar -rcs -o $@ $^ 
 	@echo -e '\e[1;35mBuilt target: $@\e[0m'
 	
-#链接生成动态库
+# 链接生成动态库
 $(SHARED_LIB): $(OBJS)
 	@echo -e '\e[1;36mLinking CXX shared library: $@\e[0m'
 	$(CXX) -fPIC -shared -o $@ $^ $(LIB_DIR) $(LIBS)
 	@echo -e '\e[1;35mBuilt target: $@\e[0m'
 	
-#链接生成可执行文件
+# 链接生成可执行文件
 $(TARGET): $(MAIN_OBJ) $(STATIC_LIB) 
 	@echo -e '\e[1;36mLinking CXX executable: $@\e[0m'
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIB_DIR) $(LIBS) 
 	@echo -e '\e[1;35mBuilt target: $@\e[0m'
 
-#声明这是伪目标文件
+# 声明这是伪目标文件
 .PHONY: all clean 
 
 install: $(STATIC_LIB) 

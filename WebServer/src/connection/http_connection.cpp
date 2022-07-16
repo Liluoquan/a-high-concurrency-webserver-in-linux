@@ -35,7 +35,7 @@ HttpConnection::HttpConnection(event::EventLoop* event_loop, int connect_fd)
     // 得到服务器资源目录
     char cwd[100];
     char* cur_dir = getcwd(cwd, 100);
-    resource_dir_ = std::string(cur_dir) + "/resource/";
+    resource_dir_ = std::string(cur_dir) + "/pages/";
 }
 
 // http连接析构时 关闭连接套接字
@@ -250,7 +250,7 @@ void HttpConnection::ReturnErrorMessage(int fd, int error_code, std::string erro
     response_body += "<title>请求出错了</title></head>";
     response_body += "<body bgcolor=\"ffffff\">";
     response_body += "<div align=\"center\">" + std::to_string(error_code) + error_message;
-    response_body += "<hr>yipeng's web server\n</div></body></html>";
+    response_body += "<hr>lawson's web server\n</div></body></html>";
 
     //响应头
     std::string response_header;
@@ -258,7 +258,7 @@ void HttpConnection::ReturnErrorMessage(int fd, int error_code, std::string erro
     response_header += "Content-Type: text/html\r\n";
     response_header += "Connection: Close\r\n";
     response_header += "Content-Length: " + std::to_string(response_body.size()) + "\r\n";
-    response_header += "Server: yipeng's web server\r\n";
+    response_header += "Server: lawson's tiny webserver\r\n";
     response_header += "\r\n";
     
     // 错误处理不考虑write不完的情况
@@ -493,7 +493,7 @@ ResponseState HttpConnection::BuildResponse() {
         if (file_name_ == "favicon.ico") {
             response_header += "Content-Type: image/png\r\n";
             response_header += "Content-Length: " + std::to_string(sizeof(web_server_favicon)) + "\r\n";
-            response_header += "Server: yipeng's web server\r\n";
+            response_header += "Server: lawson's webserver\r\n";
             response_header += "\r\n";
             write_buffer_ += response_header;
             write_buffer_ += std::string(web_server_favicon, web_server_favicon + sizeof(web_server_favicon));
@@ -521,7 +521,7 @@ ResponseState HttpConnection::BuildResponse() {
         }
         response_header += "Content-Type: " + file_type + "\r\n";
         response_header += "Content-Length: " + std::to_string(file_stat.st_size) + "\r\n";
-        response_header += "Server: yipeng's web server\r\n";
+        response_header += "Server: lawson's web server\r\n";
         // 请求头后的空行
         response_header += "\r\n";
         write_buffer_ += response_header;

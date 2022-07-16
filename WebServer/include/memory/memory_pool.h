@@ -11,9 +11,13 @@
 #include <stdarg.h>
 #include <utility>
 #include <functional>
-#include "../base/MutexLock.h"
+
+#include "locker/mutex_lock.h"
 
 #define BlockSize 4096
+
+namespace memoryPool
+{
 
 struct Slot {
     Slot* next;
@@ -38,8 +42,8 @@ private:
     Slot* lastSlot_;        // 可存放元素的最后指针
     Slot* freeSlot_;        // 元素构造后释放掉的内存链表头指针
 
-    MutexLock mutex_freeSlot_;
-    MutexLock mutex_other_;
+    locker::MutexLock mutex_freeSlot_;
+    locker::MutexLock mutex_other_;
 
     size_t padPointer(char* p, size_t align);   // 计算对齐所需空间
     Slot* allocateBlock();      // 申请内存块放进内存池
@@ -75,3 +79,7 @@ void deleteElement(T* p) {
     free_Memory(sizeof(T), reinterpret_cast<void *>(p));
     // printf("deleteElement success\n");
 }
+
+} // namespace memoryPool
+
+
