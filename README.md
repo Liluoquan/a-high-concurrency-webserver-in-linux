@@ -29,30 +29,44 @@
 项目的基本文件结构如下：
 
 ```text
-./webserver
-├── img
-│   ├── 主从Reactor模式.svg
-│   └── 多线程异步日志库系统.svg
+./WebServer/
+├── build.sh
+├── CMakeLists.txt
+├── include
+│   ├── cache
+│   ├── connection
+│   ├── event
+│   ├── locker
+│   ├── log
+│   ├── manager
+│   ├── memory
+│   ├── server
+│   ├── thread
+│   ├── timer
+│   └── utility
+├── main.cpp
+├── Makefile
+├── old_version
+├── pages
+│   ├── favicon.ico
+│   ├── game.html
+│   ├── index.html
+│   ├── music.mp3
+│   └── page.jpg
 ├── README.md
-└── WebServer
-    ├── build.sh
-    ├── CMakeLists.txt
-    ├── README.md
-    └── src
-        ├── base
-        ├── client
-        ├── CMakeLists.txt
-        ├── connection
-        ├── FTPClient
-        ├── LFUCache
-        ├── Main.cc
-        ├── manager
-        ├── memory
-        ├── package
-        ├── page
-        ├── reactor
-        ├── server
-        └── threadPool
+├── run_server.sh
+└── src
+    ├── client
+    ├── connection
+    ├── event
+    ├── lfuCache
+    ├── log
+    ├── manager
+    ├── memory
+    ├── server
+    ├── thread
+    ├── timer
+    └── utility
 ```
 
 
