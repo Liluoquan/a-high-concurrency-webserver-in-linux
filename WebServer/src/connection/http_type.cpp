@@ -36,7 +36,7 @@ std::string MimeType::get_mime(const std::string& type) {
     }
 }
 
-//web server的图标favicon
+// web server的图标favicon（已弃用）
 char web_server_favicon[555] = {
     '\x89', 'P',    'N',    'G',    '\xD',  '\xA',  '\x1A', '\xA',  '\x0',
     '\x0',  '\x0',  '\xD',  'I',    'H',    'D',    'R',    '\x0',  '\x0',

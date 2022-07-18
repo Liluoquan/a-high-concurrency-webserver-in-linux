@@ -1,6 +1,8 @@
 #ifndef LOG_LOGGING_H_
 #define LOG_LOGGING_H_
 
+#define OPEN_LOGGING
+
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
@@ -85,7 +87,7 @@ enum LogLevel {
 
 //宏定义
 #ifdef OPEN_LOGGING
-    #define LOG(level) log::Logging(__FILE__, __LINE__, level).stream() 
+    #define LOG(level)  log::Logging(__FILE__, __LINE__, level).stream() 
     #define LOG_DEBUG   log::Logging(__FILE__, __LINE__, DEBUG).stream()
     #define LOG_INFO    log::Logging(__FILE__, __LINE__, INFO).stream()
     #define LOG_WARNING log::Logging(__FILE__, __LINE__, WARNING).stream()

@@ -178,7 +178,7 @@ void HttpConnection::HandleRead() {
     }
 }
 
-//处理写  向客户端发送write_buffer中的响应报文数据
+// 处理写  向客户端发送write_buffer中的响应报文数据
 void HttpConnection::HandleWrite() {
     //如果没有发生错误 并且连接没断开 就把写缓冲区的数据 发送给客户端
     if (!is_error_ && connection_state_ != DISCONNECTED) {
@@ -196,9 +196,9 @@ void HttpConnection::HandleWrite() {
     }
 }
 
-//处理更新事件回调 
+// 处理更新事件回调 
 void HttpConnection::HandleUpdate() {
-    //删除定时器（后面会重新绑定新定时器，相当于更新到期时间)
+    // 删除定时器（后面会重新绑定新定时器，相当于更新到期时间)
     ResetTimer();
     int& events = connect_channel_->events();
 
@@ -232,15 +232,15 @@ void HttpConnection::HandleUpdate() {
 
     } else if (!is_error_ && connection_state_ == DISCONNECTING 
                     && (events & EPOLLOUT)) {
-        //对端连接已关闭
+        // 对端连接已关闭
         events = (EPOLLOUT | EPOLLET);
     } else {
-        //连接已经关闭, EpollDel，close(fd)
+        // 连接已经关闭, EpollDel，close(fd)
         event_loop_->RunInLoop(std::bind(&HttpConnection::Delete, shared_from_this()));
     }
 }
 
-//处理错误（返回错误信息）
+// 处理错误（返回错误信息）
 void HttpConnection::ReturnErrorMessage(int fd, int error_code, std::string error_message) {
     error_message = " " + error_message;
 
@@ -459,7 +459,7 @@ HeaderState HttpConnection::ParseRequestHeader() {
     return PARSE_HEADER_AGAIN;
 }
 
-//构建响应报文并写入write_buffer
+// 构建响应报文并写入write_buffer
 ResponseState HttpConnection::BuildResponse() {
     if (method_ == METHOD_POST) {
         // POST方法 暂时返回500
@@ -490,15 +490,16 @@ ResponseState HttpConnection::BuildResponse() {
         }
 
         // 如果是请求图标 把请求头+图标数据(请求体)写入write_buffer
-        if (file_name_ == "favicon.ico") {
-            response_header += "Content-Type: image/png\r\n";
-            response_header += "Content-Length: " + std::to_string(sizeof(web_server_favicon)) + "\r\n";
-            response_header += "Server: lawson's webserver\r\n";
-            response_header += "\r\n";
-            write_buffer_ += response_header;
-            write_buffer_ += std::string(web_server_favicon, web_server_favicon + sizeof(web_server_favicon));
-            return RESPONSE_SUCCESS;
-        }
+        // TODO: 加入 favicon.ico 文件
+        // if (file_name_ == "favicon.ico") {
+        //     response_header += "Content-Type: image/png\r\n";
+        //     response_header += "Content-Length: " + std::to_string(sizeof(web_server_favicon)) + "\r\n";
+        //     response_header += "Server: lawson's webserver\r\n";
+        //     response_header += "\r\n";
+        //     write_buffer_ += response_header;
+        //     write_buffer_ += std::string(web_server_favicon, web_server_favicon + sizeof(web_server_favicon));
+        //     return RESPONSE_SUCCESS;
+        // }
 
         //根据文件类型 来设置mime类型
         int pos = file_name_.find('.');
@@ -511,7 +512,7 @@ ResponseState HttpConnection::BuildResponse() {
 
         //查看请求的文件权限
         struct stat file_stat;
-        //请求文件名=资源目录+文件名
+        //请求文件名 = 资源目录 + 文件名
         file_name_ = resource_dir_ + file_name_;
         //请求的文件没有权限返回403
         if (stat(file_name_.c_str(), &file_stat) < 0) {
@@ -539,11 +540,11 @@ ResponseState HttpConnection::BuildResponse() {
             return RESPONSE_ERROR;
         }
         
-        //将文件内容通过mmap映射到一块共享内存中
+        // 将文件内容通过mmap映射到一块共享内存中
         void* mmap_address = mmap(NULL, file_stat.st_size, PROT_READ, 
                                   MAP_PRIVATE, file_fd, 0);
         close(file_fd);
-        //映射共享内存失败 也返回404
+        // 映射共享内存失败 也返回404
         if (mmap_address == (void*)-1) {
             munmap(mmap_address, file_stat.st_size);
             write_buffer_.clear();
@@ -551,10 +552,10 @@ ResponseState HttpConnection::BuildResponse() {
             return RESPONSE_ERROR;
         }
         
-        //将共享内存里的内容 写入write_buffer
+        // 将共享内存里的内容 写入write_buffer
         char* file_address = static_cast<char*>(mmap_address);
         write_buffer_ += std::string(file_address, file_address + file_stat.st_size);
-        //关闭映射
+        // 关闭映射
         munmap(mmap_address, file_stat.st_size);
         return RESPONSE_SUCCESS;
     }
@@ -569,7 +570,7 @@ void HttpConnection::Reset() {
     file_name_.clear();
     request_headers_.clear();
     
-    //删除定时器 为了重新加入新定时器到堆中
+    // 删除定时器 为了重新加入新定时器到堆中
     if (timer_.lock()) {
         auto timer = timer_.lock();
         timer->Release();
