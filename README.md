@@ -96,7 +96,9 @@ sh ./build.sh
 
 ```shell
     # 直接输入参数启动
-    ./web_server [-p port] [-t thread_numbers] [-f log_file_name] [-o open_log] [-s log_to_stderr] [-c color_log_to_stderr] [-l min_log_level]
+    ./web_server [-p port] [-t thread_numbers] [-f log_file_name] [-o open_log] \ 
+                 [-s log_to_stderr] [-c color_log_to_stderr] [-l min_log_level] \
+                 [-d page_cache_capacity]
     # 使用脚本启动
     sh ./run_server.sh
 ```
@@ -108,6 +110,7 @@ sh ./build.sh
 - `log_to_stderr`：日志同时输出到 `stderr`，1-启用 0-不启用
 - `color_log_to_stderr`：输出日志颜色，1-启用 0-不启用
 - `min_log_level`：输出的最小日志等级，0-DEBUG 1-INFO 2-WARNING 3-ERROR 4-FATAL
+- `page_cache_capacity`: 页面缓存的最大数量，默认为10
 
 
 ## 压力测试
