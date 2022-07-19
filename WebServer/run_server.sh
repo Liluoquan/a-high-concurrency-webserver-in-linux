@@ -14,8 +14,11 @@ color_log_to_stderr=1
 min_log_level=0
 #线程池
 thread_num=6
+#最大缓存页面数量
+capacity=10
 
 #运行
 ./bin/web_server -p $port -t $thread_num -f $log_file_name \
                  -o $open_log -s $log_to_stderr \
-                 -c $color_log_to_stderr -l $min_log_level
+                 -c $color_log_to_stderr -l $min_log_level \
+                 -d $capacity

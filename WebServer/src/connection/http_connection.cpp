@@ -532,31 +532,42 @@ ResponseState HttpConnection::BuildResponse() {
             return RESPONSE_SUCCESS;
         }
 
-        //请求的文件不存在返回404
-        int file_fd = open(file_name_.c_str(), O_RDONLY, 0);
-        if (file_fd < 0) {
-            write_buffer_.clear();
-            ReturnErrorMessage(connect_fd_, 404, "Not Found!");
-            return RESPONSE_ERROR;
-        }
-        
-        // 将文件内容通过mmap映射到一块共享内存中
-        void* mmap_address = mmap(NULL, file_stat.st_size, PROT_READ, 
-                                  MAP_PRIVATE, file_fd, 0);
-        close(file_fd);
-        // 映射共享内存失败 也返回404
-        if (mmap_address == (void*)-1) {
+        // 先在缓存中找
+        if (!cache::LFUCache::GetInstance().Get(file_name_, write_buffer_)) {
+            // cache miss.
+            // 请求的文件不存在返回404
+            int file_fd = open(file_name_.c_str(), O_RDONLY, 0);
+            if (file_fd < 0) {
+                write_buffer_.clear();
+                ReturnErrorMessage(connect_fd_, 404, "Not Found!");
+                return RESPONSE_ERROR;
+            }
+            // 将文件内容通过mmap映射到一块共享内存中
+            void* mmap_address = mmap(NULL, file_stat.st_size, PROT_READ, 
+                                    MAP_PRIVATE, file_fd, 0);
+            close(file_fd);
+            // 映射共享内存失败 也返回404
+            if (mmap_address == (void*)-1) {
+                munmap(mmap_address, file_stat.st_size);
+                write_buffer_.clear();
+                ReturnErrorMessage(connect_fd_, 404, "Not Found!");
+                return RESPONSE_ERROR;
+            }
+            
+            // 将共享内存里的内容 写入write_buffer
+            char* file_address = static_cast<char*>(mmap_address);
+            write_buffer_ += std::string(file_address, file_address + file_stat.st_size);
+
+            // 加入缓存
+            std::string context(file_address, file_stat.st_size);
+            cache::LFUCache::GetInstance().Set(file_name_, context);
+
+            // 关闭映射
             munmap(mmap_address, file_stat.st_size);
-            write_buffer_.clear();
-            ReturnErrorMessage(connect_fd_, 404, "Not Found!");
-            return RESPONSE_ERROR;
         }
+
+
         
-        // 将共享内存里的内容 写入write_buffer
-        char* file_address = static_cast<char*>(mmap_address);
-        write_buffer_ += std::string(file_address, file_address + file_stat.st_size);
-        // 关闭映射
-        munmap(mmap_address, file_stat.st_size);
         return RESPONSE_SUCCESS;
     }
 

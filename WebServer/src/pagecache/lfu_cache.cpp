@@ -1,4 +1,4 @@
-#include "cache/lfu_cache.h"
+#include "pagecache/lfu_cache.h"
 #include <assert.h>
 #include <iostream>
 
@@ -64,8 +64,13 @@ key_node KeyList::getLast() {
     return tail_;
 }
 
-LFUCache::LFUCache(int capacity) : capacity_(capacity) {
-    init();
+// LFUCache::LFUCache(int capacity) : capacity_(capacity) {
+//     init();
+// }
+
+void LFUCache::Initialize(int capacity) {
+    capacity_ = capacity;
+    Init();
 }
 
 LFUCache::~LFUCache() {
@@ -78,7 +83,7 @@ LFUCache::~LFUCache() {
     }
 }
 
-void LFUCache::init() {
+void LFUCache::Init() {
     // FIXME: 缓存的容量动态变化
     
     // Dummyhead_ = new Node<KeyList>();
@@ -91,7 +96,7 @@ void LFUCache::init() {
 // 更新节点频度：
 // 如果不存在下一个频度的链表，则增加一个
 // 然后将当前节点放到下一个频度的链表的头位置
-void LFUCache::addFreq(key_node& nowk, freq_node& nowf) {
+void LFUCache::AddFreq(key_node& nowk, freq_node& nowf) {
     // printf("enter addFreq\n");
     freq_node nxt;
     // FIXME: 频数有可能有溢出
@@ -124,10 +129,10 @@ void LFUCache::addFreq(key_node& nowk, freq_node& nowf) {
 
     // 如果该频度的小链表已经空了
     if(nowf != Dummyhead_ && nowf->getValue().isEmpty())
-        del(nowf);
+        Del(nowf);
 }
 
-bool LFUCache::get(string& key, string& val) {
+bool LFUCache::Get(string& key, string& val) {
     if(!capacity_)  return false;
     locker::LockGuard lock(mutex_);
     if(fmap_.find(key) != fmap_.end()) {
@@ -135,14 +140,14 @@ bool LFUCache::get(string& key, string& val) {
         key_node nowk = kmap_[key];
         freq_node nowf = fmap_[key];
         val += nowk->getValue().value_;
-        addFreq(nowk, nowf);
+        AddFreq(nowk, nowf);
         return true;
     }
     // 未命中
     return false;
 }
 
-void LFUCache::set(string& key, string& val) {
+void LFUCache::Set(string& key, string& val) {
     if(!capacity_)  return;
     // printf("kmapsize = %d capacity = %d\n", kmap_.size(), capacity_);
     locker::LockGuard lock(mutex_);
@@ -163,7 +168,7 @@ void LFUCache::set(string& key, string& val) {
         deleteElement(last);
         // 如果频度最小的链表已经没有节点，就删除
         if(head->getValue().isEmpty()) {
-            del(head);
+            Del(head);
         }
     }
     // key_node nowk = new Node<Key>();
@@ -172,12 +177,12 @@ void LFUCache::set(string& key, string& val) {
     nowk->getValue().key_ = key;
     nowk->getValue().value_ = val;
 
-    addFreq(nowk, Dummyhead_);
+    AddFreq(nowk, Dummyhead_);
     kmap_[key] = nowk;
     fmap_[key] = Dummyhead_->getNext();
 }
 
-void LFUCache::del(freq_node& node) {
+void LFUCache::Del(freq_node& node) {
     node->getPre()->setNext(node->getNext());
     if(node->getNext() != nullptr) {
         node->getNext()->setPre(node->getPre());
@@ -189,8 +194,8 @@ void LFUCache::del(freq_node& node) {
     
 }
 
-LFUCache& getCache() {
-    static LFUCache cache(LFU_CAPACITY);
+LFUCache& LFUCache::GetInstance() {
+    static LFUCache cache;
     return cache;
 }
 

@@ -60,18 +60,18 @@ void EventLoop::Loop() {
     is_stop_ = false;
 
     while (!is_stop_) {
-        //epoll_wait阻塞 等待就绪事件
+        // epoll_wait阻塞 等待就绪事件
         auto ready_channels = poller_->Poll();
         is_event_handling_ = true;
-        //处理每个就绪事件(不同channel绑定了不同的callback)
+        // 处理每个就绪事件(不同channel绑定了不同的callback)
         for (auto& channel : ready_channels) {
             channel->HandleEvents();
         }
 
         is_event_handling_ = false;
-        //执行正在等待的函数(fd注册到epoll内核事件表)
+        // 执行正在等待的函数(fd注册到epoll内核事件表)
         PerformPendingFunctions();
-        //处理超时事件 到期了就从定时器小根堆中删除(定时器析构会EpollDel掉fd)
+        // 处理超时事件 到期了就从定时器小根堆中删除(定时器析构会EpollDel掉fd)
         poller_->HandleExpire();
     }
 
@@ -86,12 +86,12 @@ void EventLoop::StopLoop() {
     }
 }
 
-//执行正在等待的函数(这里的func是SubLoop注册EpollAdd连接套接字以及绑定事件的函数)
+// 执行正在等待的函数(这里的func是SubLoop注册EpollAdd连接套接字以及绑定事件的函数)
 void EventLoop::PerformPendingFunctions() {
     std::vector<Function> functions;
     is_calling_pending_functions_ = true;
 
-    //先将正在等待执行的函数拿到本地 再执行 这样锁的时间就会小很多
+    // 先将正在等待执行的函数拿到本地 再执行 这样锁的时间就会小很多
     {
         locker::LockGuard lock(mutex_);
         functions.swap(pending_functions_);
@@ -110,7 +110,7 @@ void EventLoop::QueueInLoop(Function&& func) {
         pending_functions_.emplace_back(std::move(func));
     }
 
-    //如果跨线程调用 或者当前loop正在运行等待的函数 异步唤醒epoll_wait（向event_fd中写入数据触发可读事件）
+    // 如果跨线程调用 或者当前loop正在运行等待的函数 异步唤醒epoll_wait（向event_fd中写入数据触发可读事件）
     if (!is_in_loop_thread() || is_calling_pending_functions_) {
         WakeUp();
     }

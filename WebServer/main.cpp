@@ -3,6 +3,8 @@
 #include "server/web_server.h"
 #include "event/event_loop.h"
 #include "log/logging.h"
+#include "memory/memory_pool.h"
+#include "cache/lfu_cache.h"
 
 namespace configure {
 //默认值
@@ -13,10 +15,11 @@ static bool open_log = true;
 static bool log_to_stderr = false;
 static bool color_log_to_stderr = false;
 static int min_log_level = INFO;
+static int capacity = 10;
 
 static void ParseArg(int argc, char* argv[]) {
     int opt;
-    const char* str = "p:t:f:o:s:c:l:";
+    const char* str = "p:t:f:o:s:c:l:d";
     while ((opt = getopt(argc, argv, str)) != -1) {
         switch (opt) {
             case 'p': {
@@ -47,6 +50,10 @@ static void ParseArg(int argc, char* argv[]) {
                 min_log_level = atoi(optarg);
                 break;
             }
+            case 'd': {
+                capacity = atoi(optarg);
+                break;
+            }
             default: {
                 break;
             }
@@ -71,17 +78,23 @@ int main(int argc, char* argv[]) {
     // 设置最小日志等级
     log::Logging::set_min_log_level(configure::min_log_level);
 
+    // 初始化内存池
+    memoryPool::init_MemoryPool();
+
+    // 初始化缓存
+    cache::LFUCache::GetInstance().Initialize(configure::capacity);
+
     // 主loop  初始化poller, 把eventfd注册到epoll中并注册其事件处理回调
     event::EventLoop main_loop;
 
     // 创建监听套接字绑定服务器，监听端口，设置监听套接字为NIO，屏蔽管道信号
-    // server::WebServer::GetInstance()->Initialize(&main_loop, configure::thread_num, configure::port);
-    server::WebServer myHttpServer(&main_loop, configure::thread_num, configure::port);
+    server::WebServer::GetInstance().Initialize(&main_loop, configure::thread_num, configure::port);
+    // server::WebServer myHttpServer(&main_loop, configure::thread_num, configure::port);
     
     // 主loop创建事件循环线程池(子loop),每个线程都run起来（调用SubLoop::Loop）
     // 给监听套接字设置监听事件，绑定事件处理回调，注册到主loop的epoll内核事件表中
-    // server::WebServer::GetInstance()->Start();
-    myHttpServer.Start();
+    server::WebServer::GetInstance().Start();
+    // myHttpServer.Start();
 
     // 主loop开始事件循环  epoll_wait阻塞 等待就绪事件(主loop只注册了监听套接字的fd，所以只会处理新连接事件)
     std::cout << "================================================Start Web Server================================================" << std::endl;

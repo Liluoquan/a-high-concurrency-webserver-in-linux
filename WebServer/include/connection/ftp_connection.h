@@ -36,9 +36,9 @@ enum ProcessState {
 
 
 class ftpConnection {
-public:
+ public:
     using CallBack = std::function<ProcessState()>;
-public:
+ public:
     ftpConnection(std::shared_ptr<event::Channel> ftpChannel, unsigned int connId, std::string defaultDir, unsigned short commandOffset = 1);
     virtual ~ftpConnection();
 
@@ -47,12 +47,12 @@ public:
     int getFD();
     size_t getConnectionId();
 
-private:
+ private:
     std::shared_ptr<event::Channel> ftpChannel_;
     ProcessState processState_;
-    userManager::userManagerPtr userManager_;
+    manager::UserManager::userManagerPtr userManager_;
     std::string dir_;
-    std::shared_ptr<fileOperator> fo_; // For browsing, writing and reading
+    std::shared_ptr<manager::FileOperator> fo_; // For browsing, writing and reading
 
 
     CallBack callBackFunc[4];

@@ -12,6 +12,7 @@
 #include <map>
 
 #include "timer/timer.h"
+#include "pagecache/lfu_cache.h"
 
 //类的前置声明
 namespace event {

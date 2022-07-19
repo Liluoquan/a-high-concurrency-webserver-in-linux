@@ -40,21 +40,25 @@ if (${OPEN_LOGGING} STREQUAL "ON")
 endif()
 
 #CPP源文件
-file(GLOB UTILITY_SRC_FILE  ${SRC_DIR}/utility/*.cpp)
-file(GLOB THREAD_SRC_FILE   ${SRC_DIR}/thread/*.cpp)
-file(GLOB TIMER_SRC_FILE    ${SRC_DIR}/timer/*.cpp)
-file(GLOB LOG_SRC_FILE      ${SRC_DIR}/log/*.cpp)
-file(GLOB EVENT_SRC_FILE    ${SRC_DIR}/event/*.cpp)
-file(GLOB HTTP_SRC_FILE     ${SRC_DIR}/connection/*.cpp)
-file(GLOB SERVER_SRC_FILE   ${SRC_DIR}/server/*.cpp)
-set(MAIN_SRC_FILE           ${ROOT_DIR}/main.cpp)
+file(GLOB UTILITY_SRC_FILE        ${SRC_DIR}/utility/*.cpp)
+file(GLOB THREAD_SRC_FILE         ${SRC_DIR}/thread/*.cpp)
+file(GLOB TIMER_SRC_FILE          ${SRC_DIR}/timer/*.cpp)
+file(GLOB LOG_SRC_FILE            ${SRC_DIR}/log/*.cpp)
+file(GLOB MEMORY_SRC_FILE         ${SRC_DIR}/memory/*.cpp)
+file(GLOB EVENT_SRC_FILE          ${SRC_DIR}/event/*.cpp)
+file(GLOB PAGECACHE_SRC_FILE      ${SRC_DIR}/pagecache/*.cpp)
+file(GLOB CONNECTION_SRC_FILE     ${SRC_DIR}/connection/*.cpp)
+file(GLOB SERVER_SRC_FILE         ${SRC_DIR}/server/*.cpp)
+set(MAIN_SRC_FILE                 ${ROOT_DIR}/main.cpp)
 
 set(LIBEVENT_SOURCES ${UTILITY_SRC_FILE}
                      ${THREAD_SRC_FILE}
                      ${TIMER_SRC_FILE}
-                     ${LOG_SRC_FILE} 
+                     ${LOG_SRC_FILE}
+                     ${MEMORY_SRC_FILE}
                      ${EVENT_SRC_FILE}
-                     ${HTTP_SRC_FILE}
+                     ${PAGECACHE_SRC_FILE}
+                     ${CONNECTION_SRC_FILE}
                      ${SERVER_SRC_FILE})
 #message(${LIBEVENT_SOURCES})
 

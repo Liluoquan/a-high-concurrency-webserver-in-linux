@@ -20,7 +20,7 @@ EventLoopThread::~EventLoopThread() {
     }
 }
 
-//执行线程函数, 在线程函数还没运行起来的时候 一直阻塞 运行起来了才唤醒返回该event_loop
+// 执行线程函数, 在线程函数还没运行起来的时候 一直阻塞 运行起来了才唤醒返回该event_loop
 EventLoop* EventLoopThread::StartLoop() {
     assert(!thread_.is_started());
     //执行线程函数
@@ -36,17 +36,17 @@ EventLoop* EventLoopThread::StartLoop() {
     return sub_loop_;
 }
 
-//线程函数(内部先唤醒StartLoop, 然后调用Loop事件循环)
+// 线程函数(内部先唤醒StartLoop, 然后调用Loop事件循环)
 void EventLoopThread::Worker() {
     EventLoop event_loop;
     {
         locker::LockGuard lock(mutex_);
         sub_loop_ = &event_loop;
-        //已经运行线程函数了 唤醒StartLoop返回此event_loop对象 
+        // 已经运行线程函数了 唤醒StartLoop返回此event_loop对象 
         condition_.notify();
     }
 
-    //Loop事件循环 
+    // Loop事件循环 
     event_loop.Loop();
     sub_loop_ = NULL;
 }

@@ -65,7 +65,22 @@ key到小链表节点的映射(key,key_node).
 
 // LFU由多个链表组成
 class LFUCache {
-private:
+ public:
+    static LFUCache& GetInstance();
+    void Initialize(int capacity = 10);
+
+    bool Get(string& key, string& value); // 通过key返回value并进行LFU操作
+    void Set(string& key, string& value); // 更新LFU缓存
+    size_t GetCapacity() const { return capacity_; }
+
+ private:
+    LFUCache() {}
+    ~LFUCache();
+
+    void AddFreq(key_node& nowk, freq_node& nowf);
+    void Del(freq_node& node);
+    void Init();
+
     freq_node Dummyhead_;    // 大链表的头节点，里面每个节点都是小链表的头节点
     size_t capacity_;
     locker::MutexLock mutex_;
@@ -73,20 +88,8 @@ private:
     std::unordered_map<string, key_node> kmap_;  // key到keynode的映射
     std::unordered_map<string, freq_node> fmap_; // key到freqnode的映射
 
-    void addFreq(key_node& nowk, freq_node& nowf);
-    void del(freq_node& node);
-    void init();
 
-public:
-    LFUCache(int capicity);
-    ~LFUCache();
-
-    bool get(string& key, string& value); // 通过key返回value并进行LFU操作
-    void set(string& key, string& value); // 更新LFU缓存
-    size_t getCapacity() const { return capacity_; }
 };
-
-LFUCache& getCache();
 
 } // namespace cache
 

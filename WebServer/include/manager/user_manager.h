@@ -16,6 +16,7 @@ namespace manager
 {
 
 class UserManager {
+ public:
     using userManagerPtr = std::shared_ptr<UserManager>;
     
  public:

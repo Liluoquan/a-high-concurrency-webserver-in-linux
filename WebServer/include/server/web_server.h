@@ -12,8 +12,8 @@ namespace server
     
 class WebServer {
  public:
-    WebServer(event::EventLoop* event_loop, int thread_num, int port);
-    ~WebServer() {}
+    static WebServer& GetInstance();
+    void Initialize(event::EventLoop* event_loop, int thread_num, int port);
 
     event::EventLoop* event_loop() {
         return event_loop_;
@@ -21,9 +21,17 @@ class WebServer {
 
     void Start();
 
-    void HandleNewConnect();
+ private:
+    WebServer() {}
+    WebServer(event::EventLoop* event_loop, int thread_num, int port);
+    ~WebServer() {}
 
+    WebServer(const WebServer&) = delete;
+    WebServer& operator=(const WebServer&) = delete;
+    
+    void HandleNewConnect();
     void HandelCurConnect();
+
 
  private:
     static const int MAX_FD_NUM = 100000;

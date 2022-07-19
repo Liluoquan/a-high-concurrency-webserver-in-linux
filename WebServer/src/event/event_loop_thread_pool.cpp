@@ -7,7 +7,7 @@
 #include "log/logging.h"
 
 namespace event {
-//IO线程池
+// IO线程池
 EventLoopThreadPool::EventLoopThreadPool(EventLoop* main_loop, int thread_num)
     : main_loop_(main_loop), 
       thread_num_(thread_num), 
@@ -24,12 +24,12 @@ EventLoopThreadPool::~EventLoopThreadPool() {
     LOG(DEBUG) << "~EventLoopThreadPool()";
 }
 
-//主线程（主Loop对象）创建event_loop线程池
+// 主线程（主Loop对象）创建event_loop线程池
 void EventLoopThreadPool::Start() {
     assert(main_loop_->is_in_loop_thread());
     is_started_ = true;
 
-    //创建event_loop_thread_pool,并将开始Loop事件循环的EventLoop对象存入array中
+    // 创建event_loop_thread_pool,并将开始Loop事件循环的EventLoop对象存入array中
     for (int i = 0; i < thread_num_; ++i) {
         auto event_loop_thread = std::make_shared<EventLoopThread>();
         sub_loop_threads_.push_back(event_loop_thread);
@@ -37,9 +37,9 @@ void EventLoopThreadPool::Start() {
     }
 }
 
-//从已经开始Loop事件循环的EventLoop对象列表中 返回一个EventLoop对象 如果此时还没有 就返回主loop
+// 从已经开始Loop事件循环的EventLoop对象列表中 返回一个EventLoop对象 如果此时还没有 就返回主loop
 EventLoop* EventLoopThreadPool::GetNextLoop() {
-    //调用这个函数的必须是主loop线程
+    // 调用这个函数的必须是主loop线程
     assert(main_loop_->is_in_loop_thread());
     assert(is_started_);
 

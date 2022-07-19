@@ -17,6 +17,7 @@ namespace manager
 {
     
 class FileManager {
+ public:
     using fileManagerPtr = std::shared_ptr<FileManager>;
     
  public:
