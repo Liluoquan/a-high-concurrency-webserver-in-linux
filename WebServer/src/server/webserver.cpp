@@ -40,7 +40,7 @@ WebServer::WebServer(event::EventLoop* event_loop, int thread_num, int port)
 void WebServer::Initialize(event::EventLoop* event_loop, int thread_num, int port) {
     event_loop_ = event_loop;
     thread_num_ = thread_num;
-    port_ = port; 
+    port_ = port;
     is_started_ = false;
 
     // new一个事件循环线程池 和用于接收的Channel
